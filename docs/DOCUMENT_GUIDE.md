@@ -1,20 +1,21 @@
 # 문서 작성 가이드
 
 ## 폴더 구조 설명
-이 레포의 `docs/` 폴더는 세 가지 주요 목적을 가진 하위 폴더로 구성됩니다:
+이 레포의 `docs/` 폴더는 네 가지 주요 목적을 가진 하위 폴더로 구성됩니다:
 - **`docs/process/**: 프로젝트 간 공통으로 사용되는 프로세스 가이드(예: AGENT_SYSTEM.md, GITHUB_WORKFLOW.md)를 저장합니다.
 - **`docs/troubleshooting/**: 트러블슈팅 로그를 기록하는 폴더로, `YYYY-MM-프로젝트명.md` 형식의 파일로 관리됩니다.
 - **`docs/projects/**: 각 프로젝트별 개요 문서를 저장합니다. 프로젝트명 폴더 내부에 `OVERVIEW.md` 파일을 위치시킵니다.
+- **`docs/diagrams/**: 교육/온보딩용 프로세스 다이어그램(Mermaid)을 저장합니다. 에이전트 조직도, GitHub 계층 흐름, 세션 관리 흐름, Discord 알림 흐름 등 "이 레포 자체"의 운영 프로세스를 다룹니다. 특정 프로젝트의 시스템 아키텍처(예: finance-tracker의 DB 스키마)는 여기 두지 않고 해당 프로젝트 레포에 둡니다.
 
 ## 파일명 컨벤션
 - **트러블슈팅 로그**: `docs/troubleshooting/YYYY-MM-프로젝트명.md` (예: `2026-07-finance-tracker.md`)
 - **프로젝트 개요**: `docs/projects/프로젝트명/OVERVIEW.md` (예: `docs/projects/finance-tracker/OVERVIEW.md`)
+- **다이어그램**: `docs/diagrams/주제명.md` (예: `agent-org-confirm-chain.md`), 문서 안에 ```mermaid 코드블록으로 작성
 - **모든 파일명은 영어, 소문자, 하이픈(-)으로 구분**합니다.  
   (예: `2026-07-finance-tracker.md` → `finance-tracker`는 프로젝트명 소문자화)
 
 ## 문서 작성 규칙
-1. **내용 언어**: 모든 문서 본문은 **한국어**로 작성합니다.  
-   (예외는 `README.md` 단 하나뿐이며, 영어로 작성)
+1. **내용 언어**: 모든 문서 본문은 **한국어**로 작성합니다. 예외 없음 — README.md를 포함한 모든 문서가 한국어입니다.
 2. **메타데이터**: 문서 최상단에 다음 형식의 프론트매터를 추가합니다.
    ```
    ---
