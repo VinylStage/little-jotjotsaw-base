@@ -34,6 +34,8 @@ status: draft
 - 단순 버그 수정 (재현 단계 명확)
 - 이미 자료조사가 첨부된 이슈
 
+**자동화 도구**: [tools/research-issue/](../../tools/research-issue/README.md) — 이슈 번호만 넘기면 웹 검색 + Ollama 요약을 자동 실행하고 결과를 이슈 코멘트로 등록한다. `node tools/research-issue/research-issue.mjs <issue-number> [repo] [model]`.
+
 ## 2. GitHub 계층 구조
 | 계층 | GitHub 기능 | 설명 |
 |------|-------------|------|
