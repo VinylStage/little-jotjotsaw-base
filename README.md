@@ -1,6 +1,6 @@
 # little-jotjotsaw-base
 
-이 레포지토리는 여러 프로젝트에서 공통으로 사용하는 지식 자산을 저장하는 문서 전용 저장소입니다. 애플리케이션 코드는 포함되지 않으며, 공통 개발 프로세스, 실제 사건 기반 트러블슈팅 로그, 에이전트(AI 어시스턴트) 운영 가이드, 프로젝트 개요 문서, 교육용 프로세스 다이어그램을 모아 관리합니다.
+이 레포지토리는 여러 프로젝트에서 공통으로 사용하는 지식 자산을 저장하는 문서 전용 저장소입니다. 애플리케이션 코드는 포함되지 않으며, 공통 개발 프로세스, 에이전트(AI 어시스턴트) 운영 가이드, 교육용 프로세스 다이어그램을 모아 관리합니다. **특정 프로젝트의 이름이나 세부 내용(트러블슈팅 로그, 프로젝트 개요, 시스템 아키텍처 등)은 이 레포에 두지 않습니다** — 그런 내용은 각 프로젝트 자체 레포에 둡니다.
 
 ## 누구에게 필요한가요?
 이 레포는 VinylStage(소유자)와 다른 프로젝트 레포지토리에서 진행 중인 Claude Code 세션 사용자가 읽고 갱신해야 합니다.
@@ -15,13 +15,8 @@ little-jotjotsaw-base/
 │   ├── process/
 │   │   ├── PROCESS_GUIDE.md           (공통 개발 프로세스)
 │   │   ├── AGENT_SYSTEM.md            (에이전트 조직도, 위임 규칙, 세션 위생)
-│   │   └── GITHUB_WORKFLOW.md         (GitHub Project/Milestone/Issue 컨벤션, release-please)
-│   ├── troubleshooting/
-│   │   ├── INDEX.md                   (트러블슈팅 로그 인덱스)
-│   │   └── 2026-07-finance-tracker.md (날짜별 사건 로그)
-│   ├── projects/
-│   │   ├── finance-tracker/OVERVIEW.md
-│   │   └── discord-mcp-alert/OVERVIEW.md
+│   │   ├── GITHUB_WORKFLOW.md         (GitHub Project/Milestone/Issue 컨벤션, release-please)
+│   │   └── SDLC_WORKFLOW.md           (SDLC 5단계, 이슈/PR 템플릿, 라벨 체계)
 │   └── diagrams/                      (교육용 Mermaid 프로세스 다이어그램)
 │       ├── agent-org-confirm-chain.md (에이전트 조직도 및 컨펌 체인 프로세스)
 │       ├── github-workflow-hierarchy.md (GitHub 프로젝트/마일스톤/이슈 관리 계층)
@@ -41,7 +36,8 @@ little-jotjotsaw-base/
 
 ## 컨벤션 요약
 - 모든 문서는 한국어로 작성되며, 예외 없이 영어 사용 금지
-- 파일명은 소문자 및 하이픈(-)으로 구성 (예: `2026-07-finance-tracker.md`)
+- 파일명은 소문자 및 하이픈(-)으로 구성 (예: `session-management-flow.md`)
+- 특정 프로젝트 이름/내용은 이 레포에 포함하지 않음 (공통 자산만 관리)
 
 ## 소유권 안내
 이 레포지토리는 VinylStage의 개인 지식 저장소로, 외부 기여를 받지 않습니다.

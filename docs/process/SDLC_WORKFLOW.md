@@ -122,6 +122,6 @@ labels: chore, status:planning
 3. **릴리스 PR 생성** (예: `chore(release): v0.2.0`) →  
 4. **사람 리뷰 후 머지** →  
 5. **CHANGELOG.md/버전 태그 자동 갱신** →  
-6. **GitHub Release 발행** (예: [v0.2.0](https://github.com/VinylStage/discord-mcp-alert/releases/tag/v0.2.0))
+6. **GitHub Release 발행** (예: 레포의 `v0.2.0` 태그에 대한 Release 페이지 자동 생성)
 
-> **실제 사례**: discord-mcp-alert 레포에서 `v0.1.0` → `v0.1.1` (fix: 버그 수정) → `v0.2.0` (feat: 로그인 기능 추가)로 자동 릴리스됨.
+> **예시**: 어느 프로젝트 레포가 `v0.1.0` → `v0.1.1` (fix: 버그 수정) → `v0.2.0` (feat: 로그인 기능 추가) 순으로 자동 릴리스된 흐름처럼, Conventional Commits만 지켜지면 나머지는 release-please가 처리합니다.

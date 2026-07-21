@@ -29,7 +29,7 @@ Claude Code (Main Orchestrator)
 
 ## ORACLE 호출 규칙
 - **병렬 호출 금지**: 모든 ORACLE 호출은 **순차적 실행**으로 제한  
-  - *사고 사례*: 2026년 7월, ORACLE 동시 다중 호출로 메모리 부족(OOM) 및 처리 지연/블로킹 발생 → 규칙 제정 배경 (자세한 내용은 [docs/troubleshooting/2026-07-finance-tracker.md](../troubleshooting/2026-07-finance-tracker.md) 참고)
+  - *사고 사례*: 과거 ORACLE을 동시에 여러 번 병렬 호출했다가 메모리 부족(OOM) 및 처리 지연/블로킹이 발생한 적이 있어, 이 규칙이 제정되었습니다.
 - **리소스 확인 필수**:  
   - 호출 전 시스템/GPU 메모리 여유 확인 (`free -h`, `nvidia-smi` 등 환경에 맞는 도구 사용)
 - **사용 후 정리**: ORACLE 호출 결과를 저장한 뒤, 불필요하게 프로세스를 띄워두지 않기

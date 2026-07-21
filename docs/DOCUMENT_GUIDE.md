@@ -1,18 +1,15 @@
 # 문서 작성 가이드
 
 ## 폴더 구조 설명
-이 레포의 `docs/` 폴더는 네 가지 주요 목적을 가진 하위 폴더로 구성됩니다:
-- **`docs/process/**: 프로젝트 간 공통으로 사용되는 프로세스 가이드(예: AGENT_SYSTEM.md, GITHUB_WORKFLOW.md)를 저장합니다.
-- **`docs/troubleshooting/**: 트러블슈팅 로그를 기록하는 폴더로, `YYYY-MM-프로젝트명.md` 형식의 파일로 관리됩니다.
-- **`docs/projects/**: 각 프로젝트별 개요 문서를 저장합니다. 프로젝트명 폴더 내부에 `OVERVIEW.md` 파일을 위치시킵니다.
-- **`docs/diagrams/**: 교육/온보딩용 프로세스 다이어그램(Mermaid)을 저장합니다. 에이전트 조직도, GitHub 계층 흐름, 세션 관리 흐름, Discord 알림 흐름 등 "이 레포 자체"의 운영 프로세스를 다룹니다. 특정 프로젝트의 시스템 아키텍처(예: finance-tracker의 DB 스키마)는 여기 두지 않고 해당 프로젝트 레포에 둡니다.
+이 레포의 `docs/` 폴더는 두 가지 목적의 하위 폴더로 구성됩니다:
+- **`docs/process/`**: 여러 프로젝트가 공통으로 참조하는 프로세스 가이드(예: PROCESS_GUIDE.md, AGENT_SYSTEM.md, GITHUB_WORKFLOW.md, SDLC_WORKFLOW.md)를 저장합니다.
+- **`docs/diagrams/`**: 교육/온보딩용 프로세스 다이어그램(Mermaid)을 저장합니다. 에이전트 조직도, GitHub 계층 흐름, 세션 관리 흐름, Discord 알림 흐름 등 "이 레포 자체"의 공통 운영 프로세스만 다룹니다.
+
+**중요**: 이 레포는 공통 자산 전용 저장소입니다. 특정 프로젝트의 이름, 트러블슈팅 로그, 프로젝트 개요, 시스템 아키텍처는 절대 포함하지 않습니다 — 그런 내용은 각 프로젝트 자체 레포에 둡니다.
 
 ## 파일명 컨벤션
-- **트러블슈팅 로그**: `docs/troubleshooting/YYYY-MM-프로젝트명.md` (예: `2026-07-finance-tracker.md`)
-- **프로젝트 개요**: `docs/projects/프로젝트명/OVERVIEW.md` (예: `docs/projects/finance-tracker/OVERVIEW.md`)
-- **다이어그램**: `docs/diagrams/주제명.md` (예: `agent-org-confirm-chain.md`), 문서 안에 ```mermaid 코드블록으로 작성
-- **모든 파일명은 영어, 소문자, 하이픈(-)으로 구분**합니다.  
-  (예: `2026-07-finance-tracker.md` → `finance-tracker`는 프로젝트명 소문자화)
+- **다이어그램**: `docs/diagrams/주제명.md` (예: `agent-org-confirm-chain.md`), 문서 안에 `mermaid` 코드블록으로 작성
+- **모든 파일명은 영어, 소문자, 하이픈(-)으로 구분**합니다.
 
 ## 문서 작성 규칙
 1. **내용 언어**: 모든 문서 본문은 **한국어**로 작성합니다. 예외 없음 — README.md를 포함한 모든 문서가 한국어입니다.
@@ -21,24 +18,10 @@
    ---
    title: 문서 제목
    date: YYYY-MM-DD
-   project: 관련 프로젝트명 (해당 없으면 생략)
    status: draft | reviewed
    ---
    ```
-3. **트러블슈팅 로그 구조**:  
-   다음 섹션을 반드시 포함합니다.
-   ```
-   ## 배경
-   ## 증상
-   ## 원인
-   ## 해결
-   ## 재발 방지
-   ```
-
-## 인덱스 파일 관리
-- 새 문서를 추가할 때 **반드시 관련 인덱스 파일에 링크를 추가**합니다.
-  - 예: `docs/troubleshooting/INDEX.md`에 새 로그 파일 링크 추가
-  - 예: `docs/projects/` 폴더에 새로운 프로젝트 폴더 생성 시 `docs/projects/INDEX.md` 업데이트
+3. **프로젝트 특정 내용 금지**: 프로젝트명, 특정 레포의 트러블슈팅 사례, 특정 시스템의 아키텍처 등은 작성하지 않습니다. 예시가 필요하면 프로젝트명을 밝히지 않는 일반화된 표현(예: "어느 프로젝트 레포")을 사용합니다.
 
 ## 작업 워크플로우
 1. **폴더/구조 생성**: 사람이 `docs/` 하위에 새 폴더 또는 파일을 생성합니다.
