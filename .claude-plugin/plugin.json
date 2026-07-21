@@ -1,0 +1,10 @@
+{
+  "name": "little-jotjotsaw-base",
+  "displayName": "little-jotjotsaw-base",
+  "version": "1.0.0",
+  "description": "SDLC 프로세스, 에이전트 시스템, 자료조사 도구 모음",
+  "author": {
+    "name": "VinylStage"
+  },
+  "keywords": ["sdlc", "agent-system", "research", "github-workflow"]
+}

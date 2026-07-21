@@ -10,6 +10,13 @@
 little-jotjotsaw-base/
 ├── README.md
 ├── CLAUDE.md                          (Claude Code 운영 지침)
+├── .claude-plugin/                    (Claude Code 플러그인 매니페스트 — 아래 "플러그인 설치" 참고)
+│   ├── plugin.json
+│   └── marketplace.json
+├── skills/                            (플러그인 설치 시 사용 가능한 스킬)
+│   ├── sdlc-guide/SKILL.md
+│   ├── research/SKILL.md
+│   └── agent-system/SKILL.md
 ├── docs/
 │   ├── DOCUMENT_GUIDE.md              (문서 기여 가이드: 파일명/구조/메타데이터)
 │   ├── process/
@@ -29,6 +36,7 @@ little-jotjotsaw-base/
 ## 사용 방법
 - Claude 운영 규칙은 [CLAUDE.md](CLAUDE.md)를 참고하세요.
 - 문서 기여 컨벤션은 [docs/DOCUMENT_GUIDE.md](docs/DOCUMENT_GUIDE.md)를 참고하세요.
+- 다른 프로젝트에서 Claude Code 플러그인으로 설치하는 방법은 [CLAUDE.md의 "플러그인으로 설치"](CLAUDE.md)를 참고하세요.
 
 ## 다이어그램
 - `agent-org-confirm-chain.md`: 에이전트 조직도 및 컨펌 체인 프로세스

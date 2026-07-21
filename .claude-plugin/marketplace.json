@@ -1,0 +1,13 @@
+{
+  "name": "little-jotjotsaw-base",
+  "description": "VinylStage 공통 SDLC 프로세스, 에이전트 시스템, 자료조사 도구 플러그인",
+  "owner": {
+    "name": "VinylStage"
+  },
+  "plugins": [
+    {
+      "name": "little-jotjotsaw-base",
+      "source": "./"
+    }
+  ]
+}
