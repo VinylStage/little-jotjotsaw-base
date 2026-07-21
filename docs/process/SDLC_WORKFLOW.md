@@ -125,3 +125,54 @@ labels: chore, status:planning
 6. **GitHub Release 발행** (예: 레포의 `v0.2.0` 태그에 대한 Release 페이지 자동 생성)
 
 > **예시**: 어느 프로젝트 레포가 `v0.1.0` → `v0.1.1` (fix: 버그 수정) → `v0.2.0` (feat: 로그인 기능 추가) 순으로 자동 릴리스된 흐름처럼, Conventional Commits만 지켜지면 나머지는 release-please가 처리합니다.
+
+## 9. 유지보수 사이클
+
+### 9.1 유지보수 개요
+릴리스 이후에도 지속적으로 진행되는 코드/앱 상태 감사 프로세스로, "발견→기획→개발→검수→배포"의 SDLC 5단계가 주기적으로 반복됩니다. 이는 릴리스 후에도 기술 부채, 보안 취약점, 의존성 문제를 체계적으로 관리하기 위한 순환적 워크플로우입니다.
+
+### 9.2 자동 감사 항목 (GitHub Actions 기반)
+매주 1회 정기 스케줄 + 수동 트리거로 실행되는 자동 감사 프로세스로, 다음 3가지 항목을 점검합니다:
+- **보안 취약점 스캔**: `npm audit` 또는 `pip-audit`로 보안 취약점 검출
+- **의존성 버전 갭 감사**: major 버전 미업데이트 패키지 탐지
+- **빌드 실패 감지**: 빌드 실패 시 즉시 알림
+
+```yaml
+# .github/workflows/maintenance-audit.yml
+name: Maintenance Audit
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # 매주 월요일 00:00
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run security audit
+        # 프로젝트 스택에 맞게 선택
+        run: npm audit --json --production
+        # 또는 Python 프로젝트: pip-audit --fail-on-severity high
+      - name: Check dependency version gaps
+        run: npx npm-check-updates --format group
+        # major 버전이 뒤처진 패키지를 그룹별로 출력 (Python은 `pip list --outdated` 등으로 대체)
+```
+
+### 9.3 수동 감사 항목 (월 1회 권장)
+- 코드 품질 리뷰 (기술 부채 식별)
+- 실제 앱 동작 상태 점검 (API 응답 정상 여부, UI 정상 렌더링 여부)
+- 로드맵 대비 누락된 기능 점검
+
+### 9.4 이슈 제기 기준
+| 감사 유형         | 등급             | 라벨               | 처리 방식                     |
+|--------------------|------------------|--------------------|-----------------------------|
+| 자동 감사 결과     | HIGH/CRITICAL    | `P1-high`          | 즉시 이슈 생성              |
+| 자동 감사 결과     | MODERATE         | `P2-medium`        | 이슈 생성                   |
+| 수동 감사 결과     | 모든 등급        | `chore` 또는 `enhancement` | "Maintenance" 마일스톤에 배정 |
+
+### 9.5 완료 기준
+이슈 생성(`status:triage`) → 우선순위 라벨 부여 → 마일스톤 배정(`status:planning`) → 작업 진행(`status:in-dev`) → PR 리뷰(`status:review`) → PR 머지 및 이슈 종료(`status:done`)
+
+### 9.6 알림 연동
+자동 감사 결과는 Discord로 요약 전송됩니다. 성공 시 `success` 이벤트, 취약점 발견 시 `error`/`warning` 이벤트 타입으로 알림이 전송됩니다. 상세 흐름은 [discord-notification-flow.md](../diagrams/discord-notification-flow.md)를 참고하세요.
