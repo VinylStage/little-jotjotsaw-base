@@ -1,6 +1,6 @@
 # VinylStage 프로젝트 공통 프로세스 가이드
 
-> 이 문서는 finance-tracker 개발 과정에서 정립된 모든 컨벤션, 워크플로우, 에이전트 운영 방식을 담은 공통 자산입니다.
+> 이 문서는 `<프로젝트명>`(작성 시 실제 프로젝트명으로 교체) 개발 과정에서 정립된 모든 컨벤션, 워크플로우, 에이전트 운영 방식을 담은 공통 자산입니다.
 > 새 프로젝트를 시작할 때 이 파일을 복사해서 프로젝트 루트에 `CLAUDE.md`로 두세요.
 
 ---
@@ -315,7 +315,7 @@ try {
 
 ## 9. Discord MCP 알림 패턴
 
-MCP 서버: `~/vinylstudio/discord-mcp-alert`
+MCP 서버: `~/<workspace>/<project-name>`  # 실제 워크스페이스 경로와 MCP 서버 프로젝트명으로 교체
 
 ### 이벤트 타입
 
@@ -339,7 +339,7 @@ notify_discord(
     title="Phase 2 완료",
     event_type="phase",
     source="axel",            # 발신 에이전트
-    project="finance-tracker",
+    project="<프로젝트명>",    # 알림을 보내는 프로젝트 이름으로 교체
     fields=[
         {"name": "커밋", "value": "feat(phase2): ...", "inline": True},
         {"name": "다음 단계", "value": "Phase 3 대시보드 확장", "inline": True},
@@ -351,7 +351,7 @@ notify_discord(
     "아키텍처 변경이 필요합니다. 승인해주세요.",
     event_type="ask",
     source="eva",
-    project="finance-tracker",
+    project="<프로젝트명>",    # 알림을 보내는 프로젝트 이름으로 교체
 )
 ```
 
@@ -447,4 +447,4 @@ docs: ARCHITECTURE.md Phase 2 API 엔드포인트 갱신
 
 ---
 
-*마지막 갱신: 2026-07-21 | 기반 프로젝트: finance-tracker*
+*마지막 갱신: 2026-07-21 | 기반 프로젝트: `<프로젝트명>` (작성 시 실제 프로젝트명으로 교체)*
