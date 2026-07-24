@@ -119,6 +119,8 @@ labels: chore, status:planning
 - [ ] 셀프 리뷰 완료: (예: `✅`)
 ```
 
+**자동화 도구**: [tools/review-pr/](../../tools/review-pr/README.md) — PR 번호만 넘기면 diff를 로컬 Ollama로 분석해 "변경 요약/리스크/검수 체크포인트/판단 보류" 리뷰 초안을 PR 코멘트로 등록한다. `node tools/review-pr/review-pr.mjs <pr-number> [repo] [model]`. 참고용이며 사람 리뷰와 머지 판단을 대체하지 않는다.
+
 ## 6. 우선순위 라벨
 | 라벨 | 판단 기준 | SLA 예시 |
 |------|-----------|----------|
