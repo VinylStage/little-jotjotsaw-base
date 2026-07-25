@@ -1,0 +1,17 @@
+[project]
+name = "confirm-chain"
+version = "0.1.0"
+description = "에이전트 컨펌 체인 상태그래프"
+authors = [{ name = "VinylStage" }]
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "langgraph>=1.2,<2",
+    "langgraph-checkpoint-sqlite>=3.1,<4",
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0"]
+build-backend = "poetry.core.masonry.api"

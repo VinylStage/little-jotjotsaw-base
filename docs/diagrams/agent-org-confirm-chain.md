@@ -33,3 +33,5 @@ flowchart TD
 - **VANCE 초안**: status: draft → 검수 후 status: reviewed 전환 필수  
 - **ORACLE 호출 전**: 리소스(메모리/GPU) 여유 확인 및 **순차 실행만 허용** (병렬 금지)  
 - **프로세스 문서(PROCESS_GUIDE.md) 변경**: 승인 필수
+
+**구현**: [tools/confirm-chain/](../../tools/confirm-chain/README.md) — 이 다이어그램을 LangGraph 상태그래프로 옮긴 것이다. 사람 검수·승인 지점을 `interrupt()` 로 강제하고 결정 이력을 체크포인트로 남겨 되돌릴 수 있다. `poetry run python confirm_chain.py <track> "<작업>"`.

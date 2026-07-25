@@ -7,3 +7,5 @@ __pycache__/
 .env
 venv/
 .venv/
+# confirm-chain 체크포인트
+*.sqlite
