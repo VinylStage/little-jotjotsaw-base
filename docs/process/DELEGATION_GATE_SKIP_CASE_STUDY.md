@@ -95,4 +95,4 @@ status: draft
 ## 참고
 
 - 관련: [`AGENT_SYSTEM.md`](./AGENT_SYSTEM.md)의 「Claude:opencode 작업 분배 비율 플랜」, [`DELEGATION_RELIABILITY_CASE_STUDY.md`](./DELEGATION_RELIABILITY_CASE_STUDY.md)(위임을 시도했으나 신뢰도가 무너진 사례 — 이 문서는 그 반대편, 위임 시도 자체가 없었던 사례)
-- 이 사례의 상세 원자료(프로젝트명, 이슈 번호, 실제 실행 로그)는 본 레포의 범위 원칙에 따라 여기 포함하지 않는다. 실명·세부사항이 포함된 전체 기록은 관련 블로그 글을 참고.
+- 이 사례의 상세 원자료(프로젝트명, 이슈 번호, 실제 실행 로그)는 본 레포의 범위 원칙에 따라 여기 포함하지 않는다. 실명·세부사항이 포함된 전체 기록: [위임 비율이 100:0이 된 걸 알아챈 건 사용자였다](https://vinylims.com/blog/dev-20260726-151621/)
