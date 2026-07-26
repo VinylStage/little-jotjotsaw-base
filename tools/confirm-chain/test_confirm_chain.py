@@ -2,7 +2,7 @@
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
 
-from confirm_chain import build_graph, rewind_target, stub_executor
+from confirm_chain import build_graph, rewind_target, stub_executor, thread_status
 
 FAIL = []
 
@@ -107,6 +107,39 @@ gate = [h for h in a.get_state_history(cfg) if any(t.interrupts for t in h.tasks
 s4 = a.invoke(Command(resume="reject:무시될 결정"), gate.config)
 check("게이트 지점 재개는 새 결정을 반영하지 않음", s4.get("approved") is True,
       "이 동작이 바뀌면 rewind_target 설명을 갱신해야 한다")
+
+print("\n[10] thread_status — 커밋 훅이 기계 판독할 승인 상태")
+a = app()
+
+# 없는 스레드
+st = thread_status(a, {"configurable": {"thread_id": "unknown"}})
+check("없는 스레드는 none", st["state"] == "none", str(st))
+
+# 승인 대기
+cfg = {"configurable": {"thread_id": "s1"}}
+a.invoke({"track": "process_doc", "task": "문서 변경", "log": []}, cfg)
+st = thread_status(a, cfg)
+check("승인 게이트 대기 중은 pending", st["state"] == "pending", str(st))
+
+# 승인
+a.invoke(Command(resume="approve"), cfg)
+st = thread_status(a, cfg)
+check("승인 후는 approved", st["state"] == "approved", str(st))
+check("승인 상태에 트랙 포함", st.get("track") == "process_doc", str(st))
+
+# 반려
+cfg = {"configurable": {"thread_id": "s2"}}
+a.invoke({"track": "process_doc", "task": "문서 변경", "log": []}, cfg)
+a.invoke(Command(resume="reject:근거 부족"), cfg)
+st = thread_status(a, cfg)
+check("반려 후는 rejected", st["state"] == "rejected", str(st))
+check("반려 사유 포함", st.get("reason") == "근거 부족", str(st))
+
+# 검수가 필요 없던 트랙이 그냥 끝난 경우는 승인으로 보지 않는다
+cfg = {"configurable": {"thread_id": "s3"}}
+a.invoke({"track": "subagent", "task": "검수 불필요 작업", "needs_review": False, "log": []}, cfg)
+st = thread_status(a, cfg)
+check("검수 없이 끝난 스레드는 approved 가 아님", st["state"] != "approved", str(st))
 
 print()
 if FAIL:

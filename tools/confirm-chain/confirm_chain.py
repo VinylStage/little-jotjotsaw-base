@@ -202,6 +202,34 @@ def build_graph(
     return g
 
 
+def thread_status(app, cfg) -> dict[str, Any]:
+    """스레드의 현재 승인 상태를 조회한다.
+
+    커밋 훅 같은 외부 게이트가 "이 변경은 승인을 받았는가"를 기계적으로
+    물어볼 수 있어야 한다. 사람이 이력을 읽고 판단하는 --history 와 달리
+    이 함수는 단일 상태값으로 환원한다.
+
+    state: none(스레드 없음) | pending(승인 대기) | approved | rejected
+    """
+    snap = app.get_state(cfg)
+    if snap is None or not snap.created_at:
+        return {"state": "none", "thread": cfg["configurable"]["thread_id"]}
+    if any(t.interrupts for t in snap.tasks):
+        return {"state": "pending", "thread": cfg["configurable"]["thread_id"]}
+    values = snap.values or {}
+    if values.get("blocked_reason"):
+        return {"state": "rejected", "reason": values["blocked_reason"],
+                "thread": cfg["configurable"]["thread_id"]}
+    if values.get("approved"):
+        return {"state": "approved", "track": values.get("track"),
+                "thread": cfg["configurable"]["thread_id"]}
+    if values.get("approved") is False:
+        return {"state": "rejected", "reason": values.get("rejected_reason", ""),
+                "thread": cfg["configurable"]["thread_id"]}
+    # 검수가 필요 없던 트랙이 그냥 끝난 경우 — 승인으로 보지 않는다.
+    return {"state": "none", "thread": cfg["configurable"]["thread_id"]}
+
+
 def rewind_target(app, cfg):
     """결정을 다시 내리기 위해 되감을 체크포인트를 찾는다.
 
@@ -227,11 +255,14 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--rewind", action="store_true",
                    help="이미 내린 결정을 취소하고 승인 게이트 직전으로 되감는다")
     p.add_argument("--history", action="store_true", help="스레드의 체크포인트 이력을 출력하고 종료")
+    p.add_argument("--status", action="store_true",
+                   help="스레드의 승인 상태만 출력한다(커밋 훅 등 기계 판독용). "
+                        "종료코드: 0=승인, 2=승인대기, 1=반려 또는 없음")
     p.add_argument("--db", default=".confirm-chain.sqlite", help="체크포인트 DB 경로")
     p.add_argument("--stub", action="store_true", help="실제 모델을 호출하지 않고 검증용 실행기를 쓴다")
     args = p.parse_args(argv)
 
-    if not (args.resume or args.rewind or args.history) and not (args.track and args.task):
+    if not (args.resume or args.rewind or args.history or args.status) and not (args.track and args.task):
         p.error("track 과 task 는 새 실행에 필수다")
 
     executor = stub_executor if args.stub else opencode_executor
@@ -245,6 +276,11 @@ def main(argv: Optional[list[str]] = None) -> int:
                 pending = "인터럽트대기" if any(t.interrupts for t in snap.tasks) else ""
                 print(f"{snap.config['configurable'].get('checkpoint_id')} next={snap.next} {pending}")
             return 0
+
+        if args.status:
+            status = thread_status(app, cfg)
+            print(json.dumps(status, ensure_ascii=False))
+            return {"approved": 0, "pending": 2}.get(status["state"], 1)
 
         if args.rewind:
             target = rewind_target(app, cfg)
