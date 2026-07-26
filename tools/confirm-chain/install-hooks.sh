@@ -61,8 +61,8 @@ fi
 
 # 5. 체크포인트 DB 를 추적에서 제외
 GI="$TARGET/.gitignore"
-if ! grep -qxF '.confirm-chain.sqlite' "$GI" 2>/dev/null; then
-  printf '\n# confirm-chain 승인 체크포인트 (로컬 전용)\n.confirm-chain.sqlite\n' >> "$GI"
+if ! grep -qxF '.confirm-chain.sqlite*' "$GI" 2>/dev/null; then
+  printf '\n# confirm-chain 승인 체크포인트 (로컬 전용)\n.confirm-chain.sqlite*\n' >> "$GI"
   echo "  추가: .gitignore <- .confirm-chain.sqlite"
 fi
 

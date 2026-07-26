@@ -11,4 +11,4 @@ venv/
 *.sqlite
 
 # confirm-chain 승인 체크포인트 (로컬 전용)
-.confirm-chain.sqlite
+.confirm-chain.sqlite*

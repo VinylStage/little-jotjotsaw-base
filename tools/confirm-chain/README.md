@@ -70,6 +70,80 @@ poetry run python confirm_chain.py --history --thread guide
 poetry run python confirm_chain.py --rewind  --thread guide
 ```
 
+### 승인 상태 조회 (기계 판독용)
+
+`--history` 는 사람이 읽는 이력이고, `--status` 는 단일 상태값으로 환원해 스크립트가 분기할 수 있게 합니다. 커밋 훅이 이걸 씁니다.
+
+```bash
+poetry run python confirm_chain.py --status --thread guide
+# {"state": "approved", "track": "process_doc", "thread": "guide"}
+```
+
+| state | 종료코드 | 의미 |
+|---|---|---|
+| `approved` | `0` | 승인됨 |
+| `pending` | `2` | 승인 대기 중 |
+| `rejected` | `1` | 반려됨 |
+| `none` | `1` | 해당 스레드 없음 (또는 검수를 거치지 않고 끝난 스레드) |
+
+---
+
+## 문서 변경 게이트 (커밋 훅 배선)
+
+`process_doc` 트랙을 **커밋 시점에 강제**합니다. 감시 경로의 문서가 스테이징돼 있는데 승인이 없으면 커밋이 중단됩니다.
+
+### 설치
+
+```bash
+./install-hooks.sh <대상 저장소 경로> '<감시 glob>' ['<감시 glob>' ...]
+
+# 예
+./install-hooks.sh ~/work/some-repo 'docs/process/*'
+./install-hooks.sh ~/work/other-repo 'docs/audit/*' 'docs/decisions/*'
+```
+
+설치되는 것:
+
+| 대상 | 추적 여부 | 내용 |
+|---|---|---|
+| `.githooks/pre-commit` | 추적됨 | 게이트 본체 |
+| `.githooks/prepare-commit-msg` | 추적됨 | `Doc-Approval:` 트레일러 부착 |
+| `.confirm-chain-paths` | 추적됨 | 감시 glob 목록 (저장소별) |
+| `core.hooksPath`, `confirmchain.dir` | **로컬 설정** | 도구 절대경로가 커밋되지 않도록 git config 에 둡니다 |
+| `.gitignore` | 추적됨 | 체크포인트 DB 제외 |
+
+### 동작
+
+```
+git commit
+   │
+   ├─ 감시 경로에 스테이징된 문서 없음 ──────────────► 통과
+   │
+   └─ 있음 → 스테이징된 diff 내용을 해시해 스레드 ID 생성
+              │
+              ├─ 승인됨(exit 0) ──► 통과 + Doc-Approval 트레일러 부착
+              ├─ 승인 대기(exit 2) ► 중단, 재개 명령 안내
+              └─ 없음/반려(exit 1) ► 중단, 승인 절차 안내
+```
+
+**스레드 ID는 내용 해시입니다.** 문서를 한 글자라도 고치면 다른 스레드가 되므로 이전 승인이 자동으로 무효화됩니다 — 승인 한 번으로 이후 변경까지 덮는 것을 막습니다.
+
+### 우회
+
+`git commit --no-verify` 로 건너뛸 수 있습니다. 다만 그 커밋에는 `Doc-Approval` 트레일러가 없으므로, 사후에 트레일러만 훑으면 우회 이력이 그대로 드러납니다.
+
+```bash
+# 감시 경로 문서를 건드렸는데 승인 트레일러가 없는 커밋 찾기
+git log --format='%H %s' --name-only -- 'docs/process/*' | ...
+git log --format='%H %(trailers:key=Doc-Approval)' -20
+```
+
+### 알려진 한계
+
+- **오케스트레이터가 스스로 `--resume approve` 를 할 수 있습니다.** 게이트는 "승인 절차를 거쳤는가"를 강제할 뿐 "누가 승인했는가"는 검증하지 않습니다. 자기 작업을 자기가 승인하면 게이트는 형식만 남습니다 — 실질 검수 지점은 PR 리뷰로 두고, 이 게이트는 *승인 없이 조용히 지나가는 것*을 막는 용도로 쓰는 것이 현재 설계입니다.
+- 훅은 `bash` 3.2(macOS 기본)에서 동작하도록 작성했습니다. `mapfile` 등 bash 4 문법을 추가하지 마세요 — 초판이 이 문제로 위반을 놓친 적이 있습니다.
+- 게이트를 수정했다면 **반드시 의도적으로 실패시켜 빨간불을 확인**하세요.
+
 ## 컨펌 체인 규칙이 코드에서 강제되는 지점
 
 | 규칙 | 강제 방식 |
