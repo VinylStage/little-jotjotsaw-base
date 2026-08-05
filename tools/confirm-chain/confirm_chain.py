@@ -11,9 +11,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Any, Callable, Literal, Optional, TypedDict
 
@@ -88,6 +90,51 @@ def _resident_models() -> list[str]:
     return [ln.split()[0] for ln in lines]
 
 
+# 산출물 문자열에서 문서 경로를 뽑아 `status: draft` 를 `reviewed` 로 바꾼다.
+#
+# 승인은 원래 state["output"] 안의 문자열만 고쳤다. 그런데 위임 에이전트가
+# 문서를 **파일로 쓰기 시작하면서** 그 파일의 프론트매터는 draft 로 남았다.
+# 체인은 승인이라고 기록하는데 파일은 초안이라고 말하는 상태가 된다.
+#
+# 파일을 고르는 기준은 셋을 모두 만족할 때다.
+#   1. 산출물 문자열에 그 경로가 적혀 있다 (에이전트가 "생성 완료: `경로`" 로 알린다)
+#   2. 그 파일이 실제로 있다
+#   3. 그 파일에 `status: draft` 가 있다
+#
+# 셋 중 하나라도 어긋나면 건드리지 않는다. 승인과 무관한 초안을 함께 올리는 것이
+# 이 함수가 낼 수 있는 최악의 결과라, 후보를 좁히는 쪽으로 판단한다.
+_DOC_PATH_RE = re.compile(r"[\w./~-]+\.md\b")
+
+
+def _promote_files(output: str, root: Optional[Path] = None) -> list[str]:
+    if not output:
+        return []
+    base = Path(root) if root else Path.cwd()
+    promoted: list[str] = []
+    seen: set[Path] = set()
+    for raw in _DOC_PATH_RE.findall(output):
+        path = Path(raw)
+        candidate = path if path.is_absolute() else (base / path)
+        try:
+            candidate = candidate.resolve()
+        except OSError:
+            continue
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        if not candidate.is_file():
+            continue
+        try:
+            text = candidate.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        if "status: draft" not in text:
+            continue
+        candidate.write_text(text.replace("status: draft", "status: reviewed"), encoding="utf-8")
+        promoted.append(raw)
+    return promoted
+
+
 def build_graph(
     executor: Executor = opencode_executor,
     resident_models: Callable[[], list[str]] = _resident_models,
@@ -156,7 +203,12 @@ def build_graph(
             output = state.get("output", "")
             # 검수를 통과한 초안만 reviewed 로 전환된다.
             output = output.replace("status: draft", "status: reviewed")
-            return {"approved": True, "output": output, "log": _log(state, "사람 검수: 승인")}
+            # 산출물이 파일로 나온 경우 그 파일에도 반영한다.
+            promoted = _promote_files(output)
+            log_line = "사람 검수: 승인"
+            if promoted:
+                log_line += f" (파일 {len(promoted)}건 reviewed 전환: {', '.join(promoted)})"
+            return {"approved": True, "output": output, "log": _log(state, log_line)}
         reason = text.split(":", 1)[1].strip() if text.startswith("reject:") else text
         return {"approved": False, "rejected_reason": reason, "log": _log(state, f"사람 검수: 반려 ({reason})")}
 

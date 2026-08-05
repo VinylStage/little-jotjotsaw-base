@@ -2,7 +2,7 @@
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
 
-from confirm_chain import build_graph, rewind_target, stub_executor, thread_status
+from confirm_chain import _promote_files, build_graph, rewind_target, stub_executor, thread_status
 
 FAIL = []
 
@@ -140,6 +140,43 @@ cfg = {"configurable": {"thread_id": "s3"}}
 a.invoke({"track": "subagent", "task": "검수 불필요 작업", "needs_review": False, "log": []}, cfg)
 st = thread_status(a, cfg)
 check("검수 없이 끝난 스레드는 approved 가 아님", st["state"] != "approved", str(st))
+
+
+# --- 승인이 파일 프론트매터까지 반영되는가 ---
+#
+# 승인은 원래 체인이 들고 있는 문자열만 고쳤다. 에이전트가 문서를 파일로 쓰기
+# 시작하면서 파일은 draft 로 남았고, 체인은 승인인데 파일은 초안인 상태가 됐다.
+import tempfile
+from pathlib import Path
+
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    (root / "docs").mkdir()
+
+    target = root / "docs" / "sample.md"
+    target.write_text("---\ntitle: 샘플\nstatus: draft\n---\n\n본문\n", encoding="utf-8")
+
+    untouched = root / "docs" / "other.md"
+    untouched.write_text("---\nstatus: draft\n---\n", encoding="utf-8")
+
+    promoted = _promote_files("문서 생성 완료: `docs/sample.md`", root=root)
+
+    check("승인이 파일의 status 를 reviewed 로 바꾼다",
+          "status: reviewed" in target.read_text(encoding="utf-8"))
+    check("반영된 파일 목록을 돌려준다", promoted == ["docs/sample.md"], str(promoted))
+    check("산출물에 안 적힌 파일은 건드리지 않는다",
+          "status: draft" in untouched.read_text(encoding="utf-8"))
+
+    missing = _promote_files("문서 생성 완료: `docs/nope.md`", root=root)
+    check("없는 파일은 조용히 건너뛴다", missing == [], str(missing))
+
+    already = root / "docs" / "done.md"
+    already.write_text("---\nstatus: reviewed\n---\n", encoding="utf-8")
+    again = _promote_files("문서: `docs/done.md`", root=root)
+    check("이미 reviewed 인 파일은 목록에 안 넣는다", again == [], str(again))
+
+    check("산출물이 비면 아무것도 안 한다", _promote_files("", root=root) == [])
+
 
 print()
 if FAIL:
