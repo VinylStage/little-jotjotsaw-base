@@ -62,6 +62,10 @@ def opencode_executor(agent: str, prompt: str) -> DelegationResult:
             ["opencode", "run", "--agent", agent, prompt],
             capture_output=True,
             text=True,
+            # stdin 을 막지 않으면 opencode 가 입력을 기다리며 끝나지 않는다.
+            # 로그가 init 에서 멈추고 모델 호출조차 안 나가서 "모델이 느리다" 로
+            # 오진하기 쉽다. 헤드리스 호출이므로 읽을 입력이 없다.
+            stdin=subprocess.DEVNULL,
             timeout=1800,
         )
     except subprocess.TimeoutExpired:
