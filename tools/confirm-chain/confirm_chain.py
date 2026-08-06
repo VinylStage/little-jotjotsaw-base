@@ -26,6 +26,16 @@ from langgraph.types import Command, interrupt
 # 다이어그램의 4개 진입 트랙
 TrackName = Literal["subagent", "vance", "oracle", "process_doc"]
 
+# 위임 한 번의 제한 시간과 재시도 횟수.
+#
+# 예전 값은 1800초(30분)였다. VANCE 가 실제로 성공할 때는 26~55초에 끝나므로
+# 30분은 성공 구간의 30배가 넘고, 실패했을 때 사람이 그만큼 기다리게 된다.
+# 실측 성공률이 낮은 편이라 이 대기는 그대로 비용이 된다.
+#
+# 180초는 성공 구간의 3배 이상이다. 넘기면 재시도가 더 빠르다.
+ATTEMPT_TIMEOUT_S = 180
+ATTEMPT_LIMIT = 3
+
 # ORACLE 이 요구하는 여유 메모리 (GB). 42GB 모델 + 여유분 기준.
 ORACLE_REQUIRED_FREE_GB = 44.0
 
@@ -57,22 +67,37 @@ def opencode_executor(agent: str, prompt: str) -> DelegationResult:
     """opencode 를 헤드리스로 호출한다."""
     if shutil.which("opencode") is None:
         return DelegationResult(False, "", "opencode 실행 파일을 찾을 수 없다")
-    try:
-        proc = subprocess.run(
-            ["opencode", "run", "--agent", agent, prompt],
-            capture_output=True,
-            text=True,
-            # stdin 을 막지 않으면 opencode 가 입력을 기다리며 끝나지 않는다.
-            # 로그가 init 에서 멈추고 모델 호출조차 안 나가서 "모델이 느리다" 로
-            # 오진하기 쉽다. 헤드리스 호출이므로 읽을 입력이 없다.
-            stdin=subprocess.DEVNULL,
-            timeout=1800,
-        )
-    except subprocess.TimeoutExpired:
-        return DelegationResult(False, "", f"{agent} 호출이 30분 내에 끝나지 않았다")
-    if proc.returncode != 0:
-        return DelegationResult(False, "", f"{agent} 종료코드 {proc.returncode}: {proc.stderr[-500:]}")
-    return DelegationResult(True, proc.stdout.strip())
+    last_err = ""
+    for attempt in range(1, ATTEMPT_LIMIT + 1):
+        try:
+            proc = subprocess.run(
+                ["opencode", "run", "--agent", agent, prompt],
+                capture_output=True,
+                text=True,
+                # stdin 을 막지 않으면 opencode 가 입력을 기다리며 끝나지 않는다.
+                # 로그가 init 에서 멈추고 모델 호출조차 안 나가서 "모델이 느리다" 로
+                # 오진하기 쉽다. 헤드리스 호출이므로 읽을 입력이 없다.
+                stdin=subprocess.DEVNULL,
+                timeout=ATTEMPT_TIMEOUT_S,
+            )
+        except subprocess.TimeoutExpired:
+            last_err = f"{ATTEMPT_TIMEOUT_S}초 안에 끝나지 않음"
+            print(f"[{agent}] {attempt}/{ATTEMPT_LIMIT} 시도 {last_err} — 재시도", file=sys.stderr)
+            continue
+        if proc.returncode != 0:
+            last_err = f"종료코드 {proc.returncode}: {proc.stderr[-300:]}"
+            print(f"[{agent}] {attempt}/{ATTEMPT_LIMIT} 시도 실패 — {last_err}", file=sys.stderr)
+            continue
+        out = proc.stdout.strip()
+        if not out:
+            # 종료코드 0 인데 빈 출력이면 성공이 아니다. 모델이 끊겼거나
+            # 추론만 하고 content 를 안 낸 경우다.
+            last_err = "종료코드 0 인데 출력이 비었다"
+            print(f"[{agent}] {attempt}/{ATTEMPT_LIMIT} 시도 — {last_err}", file=sys.stderr)
+            continue
+        return DelegationResult(True, out)
+
+    return DelegationResult(False, "", f"{agent} 호출이 {ATTEMPT_LIMIT}회 모두 실패했다. 마지막: {last_err}")
 
 
 def stub_executor(agent: str, prompt: str) -> DelegationResult:
